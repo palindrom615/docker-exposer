@@ -1,7 +1,7 @@
 package serve
 
 import (
-	"docker-exposer/pkg/logger"
+	"github.com/palindrom615/docker-exposer/pkg/logger"
 	"io"
 	"net/http"
 )

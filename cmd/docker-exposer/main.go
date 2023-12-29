@@ -1,9 +1,9 @@
 package main
 
 import (
-	"docker-exposer/pkg/client"
-	"docker-exposer/pkg/logger"
-	"docker-exposer/pkg/serve"
+	"github.com/palindrom615/docker-exposer/pkg/client"
+	"github.com/palindrom615/docker-exposer/pkg/logger"
+	"github.com/palindrom615/docker-exposer/pkg/serve"
 	"net/http"
 )
 
