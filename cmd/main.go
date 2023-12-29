@@ -5,12 +5,9 @@ import (
 	"docker-exposer"
 	"github.com/docker/docker/client"
 	"io"
-	"math/rand"
 	"net/http"
 	"os"
 )
-
-var RequestIDKey = "request_id"
 
 func main() {
 	log := docker_exposer.DefaultLogger()
@@ -24,15 +21,13 @@ func main() {
 		log.Error("Failed to get Docker connection:", err)
 		os.Exit(1)
 	}
+
 	relay := docker_exposer.NewRelay(conn)
+	roundTripper := docker_exposer.NewRequestLog(log, relay)
 	defer conn.Close()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		rid := rand.Uint64()
-		log := log.With(RequestIDKey, rid)
-		log.Debug("Request", "req", req)
-
-		res, err := relay.RoundTrip(req)
+		res, err := roundTripper.RoundTrip(req)
 		if err != nil {
 			log.Error("Failed to read response:", err)
 			return
@@ -44,7 +39,6 @@ func main() {
 				w.Header().Add(key, value)
 			}
 		}
-		log.Debug("Response", "res", res)
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			log.Error("Failed to read response body:", err)
