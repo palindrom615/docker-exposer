@@ -8,3 +8,24 @@ Although [docker daemon already supports remote access via http](https://docs.do
 built-in authentication method is limited to TLS.
 
 You can modify this project and serve docker socket with additional features like authentication or CORS filter.
+
+## Usage
+
+**WARNING** 
+
+This project itself does not provide any authentication mechanism. **NEVER** expose this server to the
+public internet without additional authentication mechanism.
+
+### native
+
+```bash
+go install github.com/palindrom615/docker-exposer/cmd/docker-exposer@latest
+DOCKER_HOST=unix://$HOME/.colima/docker.sock ${GOBIN:-$HOME/go/bin}/docker-exposer
+```
+
+### docker
+
+```bash
+DOCKER_HOST=/var/run/docker.sock
+docker run -d -p 8080:8080 -v $DOCKER_HOST:/var/run/docker.sock --name docker-exposer ghcr.io/palindrom615/docker-exposer:latest
+```
