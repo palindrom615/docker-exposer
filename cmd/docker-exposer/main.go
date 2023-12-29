@@ -10,8 +10,8 @@ import (
 var log = logger.DefaultLogger()
 
 func main() {
-	dockerClient := client.NewDockerClient()
-	roundTripper := serve.NewRequestLog(dockerClient)
+	dockerConnector := client.NewDockerConnector()
+	roundTripper := serve.NewRequestLog(dockerConnector)
 
 	handler := serve.NewRoundTripHandler(roundTripper)
 	http.Handle("/", handler)
