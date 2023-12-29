@@ -21,6 +21,3 @@
 
 # ...even if they are in subdirectories
 !*/
-
-!Dockerfile
-!.dockerignore
