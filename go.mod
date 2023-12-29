@@ -1,4 +1,4 @@
-module docker-exposer
+module github.com/palindrom615/docker-exposer
 
 go 1.21
 
