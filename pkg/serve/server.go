@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/palindrom615/docker-exposer/pkg/client"
+	"github.com/palindrom615/docker-exposer/pkg/middleware"
 	"net/http"
 )
 
@@ -19,8 +20,7 @@ func NewServer(port int, options *client.DockerOptions) *Server {
 	}
 
 	dockerConnector := client.NewConnector(conn)
-	roundTripper := NewRequestLog(dockerConnector)
-	handler := NewRoundTripHandler(roundTripper)
+	handler := middleware.NewHandler(dockerConnector, middleware.RequestLog)
 	return &Server{
 		server: &http.Server{Addr: fmt.Sprintf(":%d", port), Handler: handler},
 	}
