@@ -1,22 +1,22 @@
 package client
 
 import (
-	"bufio"
-	"context"
 	"github.com/docker/docker/client"
-	"net"
-	"net/http"
 )
-
-type DockerConnector struct {
-	conn net.Conn
-}
 
 type DockerOptions struct {
 	host   string
 	cacert string
 	cert   string
 	key    string
+}
+
+type DockerClientFactory struct {
+	opts *DockerOptions
+}
+
+func NewDockerClientFactory(opts *DockerOptions) *DockerClientFactory {
+	return &DockerClientFactory{opts: opts}
 }
 
 func NewDockerOptions(host, cacert, cert, key string) *DockerOptions {
@@ -28,28 +28,24 @@ func NewDockerOptions(host, cacert, cert, key string) *DockerOptions {
 	}
 }
 
-func NewDockerConnector(opts *DockerOptions) *DockerConnector {
+func (d *DockerClientFactory) getOpts() []client.Opt {
 	o := []client.Opt{client.FromEnv}
-	if opts.host != "" {
-		o = append(o, client.WithHost(opts.host))
+	if d.opts == nil {
+		return o
 	}
-	if opts.cacert != "" && opts.cert != "" && opts.key != "" {
-		o = append(o, client.WithTLSClientConfig(opts.cacert, opts.cert, opts.key))
+	if d.opts.host != "" {
+		o = append(o, client.WithHost(d.opts.host))
 	}
-	cli, err := client.NewClientWithOpts(o...)
-	if err != nil {
-		panic(err)
+	if d.opts.cacert != "" && d.opts.cert != "" && d.opts.key != "" {
+		o = append(o, client.WithTLSClientConfig(d.opts.cacert, d.opts.cert, d.opts.key))
 	}
-	conn, err := cli.Dialer()(context.Background())
-	if err != nil {
-		panic(err)
-	}
-	return &DockerConnector{conn: conn}
+	return o
 }
 
-func (d *DockerConnector) RoundTrip(req *http.Request) (*http.Response, error) {
-	if err := req.Write(d.conn); err != nil {
-		return nil, err
+func (d *DockerClientFactory) NewDockerClient() client.CommonAPIClient {
+	cli, err := client.NewClientWithOpts(d.getOpts()...)
+	if err != nil {
+		panic(err)
 	}
-	return http.ReadResponse(bufio.NewReader(d.conn), req)
+	return cli
 }

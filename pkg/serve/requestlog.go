@@ -6,7 +6,9 @@ import (
 	"net/http"
 )
 
-var RequestIDKey = "request_id"
+type key string
+
+const RequestIDKey key = "request_id"
 
 type RequestLog struct {
 	next http.RoundTripper
