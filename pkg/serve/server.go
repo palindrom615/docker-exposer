@@ -11,8 +11,8 @@ type Server struct {
 	server *http.Server
 }
 
-func NewServer(port int) *Server {
-	dockerConnector := client.NewDockerConnector()
+func NewServer(port int, options *client.DockerOptions) *Server {
+	dockerConnector := client.NewDockerConnector(options)
 	roundTripper := NewRequestLog(dockerConnector)
 	handler := NewRoundTripHandler(roundTripper)
 	return &Server{
@@ -22,6 +22,6 @@ func NewServer(port int) *Server {
 }
 
 func (s *Server) Start() {
-	log.Info("Server listening on :8080")
+	log.Infof("Server listening on :%d", s.port)
 	s.server.ListenAndServe()
 }

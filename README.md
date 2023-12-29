@@ -20,7 +20,7 @@ public internet without additional authentication mechanism.
 
 ```bash
 go install github.com/palindrom615/docker-exposer/cmd/docker-exposer@latest
-DOCKER_HOST=unix://$HOME/.colima/docker.sock ${GOBIN:-$HOME/go/bin}/docker-exposer
+~/go/bin/docker-exposer --port 8080 --docker-host unix://$HOME/.colima/docker.sock
 ```
 
 ### docker
