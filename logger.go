@@ -8,12 +8,11 @@ import (
 var logLevel = new(slog.LevelVar)
 var logger *slog.Logger
 
-func init() {
-	logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}))
-	logLevel.Set(slog.LevelDebug)
-}
-
 func DefaultLogger() *slog.Logger {
+	if logger == nil {
+		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}))
+		logLevel.Set(slog.LevelDebug)
+	}
 	return logger
 }
 
