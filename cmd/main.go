@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"context"
+	"docker-exposer"
 	"github.com/docker/docker/client"
 	"io"
 	"log"
@@ -29,17 +29,15 @@ func main() {
 		logger.Error("Failed to get Docker connection:", err)
 		os.Exit(1)
 	}
+	relay := docker_exposer.NewRelay(conn)
 	defer conn.Close()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		rid := rand.Uint64()
 		logger := logger.With(RequestIDKey, rid)
 		logger.Debug("Request", "req", req)
-		if err := req.Write(conn); err != nil {
-			logger.Error("Failed to write request:", err)
-			return
-		}
-		res, err := http.ReadResponse(bufio.NewReader(conn), req)
+
+		res, err := relay.RoundTrip(req)
 		if err != nil {
 			logger.Error("Failed to read response:", err)
 			return
