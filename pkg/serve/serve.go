@@ -8,7 +8,7 @@ import (
 
 var log = logger.DefaultLogger()
 
-func writeResponse(w http.ResponseWriter, res *http.Response) {
+func respond(w http.ResponseWriter, res *http.Response) {
 	w.WriteHeader(res.StatusCode)
 	for key, values := range res.Header {
 		for _, value := range values {

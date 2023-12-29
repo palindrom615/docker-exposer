@@ -19,5 +19,5 @@ func (r *RoundTripHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer res.Body.Close()
-	writeResponse(w, res)
+	respond(w, res)
 }
