@@ -6,12 +6,13 @@ import (
 	"net/http"
 )
 
+var log = docker_exposer.DefaultLogger()
+
 func main() {
-	log := docker_exposer.DefaultLogger()
 	conn := docker_exposer.GetDockerConnection(context.Background())
 
 	relay := docker_exposer.NewRelay(conn)
-	roundTripper := docker_exposer.NewRequestLog(log, relay)
+	roundTripper := docker_exposer.NewRequestLog(relay)
 
 	handler := docker_exposer.NewRoundTripHandler(roundTripper)
 	http.Handle("/", handler)

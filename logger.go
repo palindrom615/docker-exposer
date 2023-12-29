@@ -1,21 +1,16 @@
 package docker_exposer
 
 import (
-	"log/slog"
-	"os"
+	"go.uber.org/zap"
 )
 
-var logLevel = new(slog.LevelVar)
-var logger *slog.Logger
+var log *zap.SugaredLogger
 
-func DefaultLogger() *slog.Logger {
-	if logger == nil {
-		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}))
-		logLevel.Set(slog.LevelDebug)
-	}
-	return logger
+func init() {
+	l, _ := zap.NewDevelopment(zap.AddCaller())
+	log = l.Sugar()
 }
 
-func SetDefaultLogLevel(level slog.Level) {
-	logLevel.Set(level)
+func DefaultLogger() *zap.SugaredLogger {
+	return log
 }
