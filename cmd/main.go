@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"docker-exposer"
+	"docker-exposer/pkg/logger"
 	"net/http"
 )
 
-var log = docker_exposer.DefaultLogger()
+var log = logger.DefaultLogger()
 
 func main() {
 	conn := docker_exposer.GetDockerConnection(context.Background())

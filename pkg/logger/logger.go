@@ -1,4 +1,4 @@
-package docker_exposer
+package logger
 
 import (
 	"go.uber.org/zap"
