@@ -1,7 +1,6 @@
-package docker_exposer
+package serve
 
 import (
-	"io"
 	"net/http"
 )
 
@@ -21,19 +20,4 @@ func (r *RoundTripHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	defer res.Body.Close()
 	writeResponse(w, res)
-}
-
-func writeResponse(w http.ResponseWriter, res *http.Response) {
-	w.WriteHeader(res.StatusCode)
-	for key, values := range res.Header {
-		for _, value := range values {
-			w.Header().Add(key, value)
-		}
-	}
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Errorw("Failed to read response body", "error", err)
-		return
-	}
-	w.Write(body)
 }
