@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"docker-exposer"
+	"docker-exposer/pkg/client"
 	"docker-exposer/pkg/logger"
 	"net/http"
 )
@@ -10,10 +10,8 @@ import (
 var log = logger.DefaultLogger()
 
 func main() {
-	conn := docker_exposer.GetDockerConnection(context.Background())
-
-	relay := docker_exposer.NewRelay(conn)
-	roundTripper := docker_exposer.NewRequestLog(relay)
+	dockerClient := client.NewDockerClient()
+	roundTripper := docker_exposer.NewRequestLog(dockerClient)
 
 	handler := docker_exposer.NewRoundTripHandler(roundTripper)
 	http.Handle("/", handler)
