@@ -3,28 +3,16 @@ package main
 import (
 	"context"
 	"docker-exposer"
-	"github.com/docker/docker/client"
 	"io"
 	"net/http"
-	"os"
 )
 
 func main() {
 	log := docker_exposer.DefaultLogger()
-	cli, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		log.Error("Failed to create Docker client", "err", err)
-		os.Exit(1)
-	}
-	conn, err := cli.Dialer()(context.Background())
-	if err != nil {
-		log.Error("Failed to get Docker connection:", err)
-		os.Exit(1)
-	}
+	conn := docker_exposer.GetDockerConnection(context.Background())
 
 	relay := docker_exposer.NewRelay(conn)
 	roundTripper := docker_exposer.NewRequestLog(log, relay)
-	defer conn.Close()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		res, err := roundTripper.RoundTrip(req)
