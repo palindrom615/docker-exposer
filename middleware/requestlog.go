@@ -16,42 +16,42 @@ const RequestID CtxKey = "request_id"
 
 var log = logger.DefaultLogger()
 
-type RequestLogWriter struct {
+type requestLogWriter struct {
 	rw         http.ResponseWriter
 	statusCode int
 	body       []byte
 }
 
-func NewRequestLogWriter(rw http.ResponseWriter) *RequestLogWriter {
-	return &RequestLogWriter{rw: rw}
+func newRequestLogWriter(rw http.ResponseWriter) *requestLogWriter {
+	return &requestLogWriter{rw: rw}
 }
 
-func (w *RequestLogWriter) Header() http.Header {
+func (w *requestLogWriter) Header() http.Header {
 	return w.rw.Header()
 }
 
-func (w *RequestLogWriter) Write(b []byte) (int, error) {
+func (w *requestLogWriter) Write(b []byte) (int, error) {
 	w.body = b
 	return w.rw.Write(b)
 }
 
-func (w *RequestLogWriter) WriteHeader(statusCode int) {
+func (w *requestLogWriter) WriteHeader(statusCode int) {
 	w.statusCode = statusCode
 	w.rw.WriteHeader(statusCode)
 }
 
-func (w *RequestLogWriter) Log(log *zap.SugaredLogger) {
+func (w *requestLogWriter) Log(log *zap.SugaredLogger) {
 	log.Debugw("Response", "status", w.statusCode, "body", string(w.body), "headers", w.Header())
 }
 
-func RequestLogHandler(next http.Handler) http.Handler {
+func LogRequst(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rid := rand.Uint64()
 		log := log.With(RequestIDKey, rid)
 		r = r.WithContext(context.WithValue(r.Context(), RequestID, rid))
 		log.Debugw("Request", "method", r.Method, "url", r.URL, "headers", r.Header, "body", r.Body)
 
-		lrw := NewRequestLogWriter(w)
+		lrw := newRequestLogWriter(w)
 
 		next.ServeHTTP(lrw, r)
 		lrw.Log(log)
