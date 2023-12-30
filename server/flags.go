@@ -30,27 +30,18 @@ func newFlags() *flags {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading the .env file: %v", err)
 	}
+	f := &flags{}
 
-	var port = flag.Int("port", 8080, "port to listen on")
-	var dockerHost = flag.String("docker-host", "", "docker host")
-	var dockerCaCert = flag.String("docker-ca-cert", "", "docker cert path")
-	var dockerCert = flag.String("docker-cert", "", "docker cert")
-	var dockerKey = flag.String("docker-key", "", "docker key")
-	var authType = flag.String("auth", os.Getenv("AUTH_TYPE"), "enable basic auth")
-	var basicAuthUsername = flag.String("basic-auth-username", os.Getenv("BASIC_AUTH_USERNAME"), "basic auth username")
-	var basicAuthPassword = flag.String("basic-auth-password", os.Getenv("BASIC_AUTH_PASSWORD"), "basic auth password")
+	flag.IntVar(&f.Port, "port", 8080, "port to listen on")
+	flag.StringVar(&f.DockerHost, "docker-host", "", "docker host")
+	flag.StringVar(&f.DockerCaCert, "docker-ca-cert", "", "docker cert path")
+	flag.StringVar(&f.DockerCert, "docker-cert", "", "docker cert")
+	flag.StringVar(&f.DockerKey, "docker-key", "", "docker key")
+	flag.StringVar(&f.AuthType, "auth", os.Getenv("AUTH_TYPE"), "auth type")
+	flag.StringVar(&f.BasicAuthUsername, "basic-auth-username", os.Getenv("BASIC_AUTH_USERNAME"), "basic auth username")
+	flag.StringVar(&f.BasicAuthPassword, "basic-auth-password", os.Getenv("BASIC_AUTH_PASSWORD"), "basic auth password")
 
 	flag.Parse()
-	f := &flags{
-		Port:              *port,
-		DockerHost:        *dockerHost,
-		DockerCaCert:      *dockerCaCert,
-		DockerCert:        *dockerCert,
-		DockerKey:         *dockerKey,
-		AuthType:          *authType,
-		BasicAuthUsername: *basicAuthUsername,
-		BasicAuthPassword: *basicAuthPassword,
-	}
 	return f
 }
 
