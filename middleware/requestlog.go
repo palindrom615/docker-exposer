@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/palindrom615/docker-exposer/pkg/logger"
+	"github.com/palindrom615/docker-exposer/logger"
 	"math/rand"
 	"net/http"
 )

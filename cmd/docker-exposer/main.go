@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/palindrom615/docker-exposer/pkg/client"
-	"github.com/palindrom615/docker-exposer/pkg/serve"
+	"github.com/palindrom615/docker-exposer/connector"
+	"github.com/palindrom615/docker-exposer/server"
 )
 
 func main() {
@@ -14,8 +14,8 @@ func main() {
 	dockerKey := flag.String("docker-key", "", "docker key")
 	flag.Parse()
 
-	dockerOption := client.NewDockerOptions(*dockerHost, *dockerCaCert, *dockerCert, *dockerKey)
+	dockerOption := connector.NewDockerOptions(*dockerHost, *dockerCaCert, *dockerCert, *dockerKey)
 
-	server := serve.NewServer(*port, dockerOption)
-	server.Start()
+	s := server.NewServer(*port, dockerOption)
+	s.Start()
 }
