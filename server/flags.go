@@ -1,6 +1,9 @@
 package server
 
-import "flag"
+import (
+	"flag"
+	"os"
+)
 
 type flags struct {
 	// Port is the port to listen on
@@ -13,21 +16,34 @@ type flags struct {
 	DockerCert string
 	// DockerKey is the path to the docker key
 	DockerKey string
+	// EnableBasicAuth enables basic auth
+	EnableBasicAuth bool
+	// BasicAuthUsername is the username for basic auth
+	BasicAuthUsername string
+	// BasicAuthPassword is the password for basic auth
+	BasicAuthPassword string
 }
 
 func newFlags() *flags {
 	var port = flag.Int("port", 8080, "port to listen on")
 	var dockerHost = flag.String("docker-host", "", "docker host")
-	var dockerCaCert = flag.String("docker-cert-path", "", "docker cert path")
+	var dockerCaCert = flag.String("docker-ca-cert", "", "docker cert path")
 	var dockerCert = flag.String("docker-cert", "", "docker cert")
 	var dockerKey = flag.String("docker-key", "", "docker key")
+	var enableBasicAuth = flag.Bool("enable-basic-auth", false, "enable basic auth")
+	var basicAuthUsername = flag.String("basic-auth-username", os.Getenv("BASIC_AUTH_USERNAME"), "basic auth username")
+	var basicAuthPassword = flag.String("basic-auth-password", os.Getenv("BASIC_AUTH_PASSWORD"), "basic auth password")
+
 	flag.Parse()
 	f := &flags{
-		Port:         *port,
-		DockerHost:   *dockerHost,
-		DockerCaCert: *dockerCaCert,
-		DockerCert:   *dockerCert,
-		DockerKey:    *dockerKey,
+		Port:              *port,
+		DockerHost:        *dockerHost,
+		DockerCaCert:      *dockerCaCert,
+		DockerCert:        *dockerCert,
+		DockerKey:         *dockerKey,
+		EnableBasicAuth:   *enableBasicAuth,
+		BasicAuthUsername: *basicAuthUsername,
+		BasicAuthPassword: *basicAuthPassword,
 	}
 	return f
 }
@@ -61,4 +77,22 @@ func (f *flags) GetDockerCert() string {
 
 func (f *flags) GetDockerKey() string {
 	return f.DockerKey
+}
+
+type basicAuthFlags interface {
+	GetEnableBasicAuth() bool
+	GetBasicAuthUsername() string
+	GetBasicAuthPassword() string
+}
+
+func (f *flags) GetEnableBasicAuth() bool {
+	return f.EnableBasicAuth
+}
+
+func (f *flags) GetBasicAuthUsername() string {
+	return f.BasicAuthUsername
+}
+
+func (f *flags) GetBasicAuthPassword() string {
+	return f.BasicAuthPassword
 }

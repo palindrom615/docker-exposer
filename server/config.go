@@ -13,7 +13,7 @@ func Configure() *Server {
 	dockerOption := provideDockerOptions(flags)
 	dockerClient := provideDockerClient(dockerOption)
 	core := provideCore(dockerClient)
-	middlewares := provideMiddlewares()
+	middlewares := provideMiddlewares(flags)
 	handler := provideHandler(core, middlewares)
 
 	return NewServer(port, handler)
@@ -51,7 +51,13 @@ func provideDockerClient(opts *[]client.Opt) client.CommonAPIClient {
 	return cli
 }
 
-func provideMiddlewares() []middleware.Middleware {
+func provideMiddlewares(flags basicAuthFlags) []middleware.Middleware {
+	if flags.GetEnableBasicAuth() && flags.GetBasicAuthUsername() != "" && flags.GetBasicAuthPassword() != "" {
+		return []middleware.Middleware{
+			middleware.NewBasicAuth(flags.GetBasicAuthUsername(), flags.GetBasicAuthPassword()).Middleware,
+			middleware.RequestLogHandler,
+		}
+	}
 	return []middleware.Middleware{
 		middleware.RequestLogHandler,
 	}
