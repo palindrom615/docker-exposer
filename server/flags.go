@@ -2,6 +2,7 @@ package server
 
 import (
 	"flag"
+	"github.com/joho/godotenv"
 	"os"
 )
 
@@ -25,6 +26,10 @@ type flags struct {
 }
 
 func newFlags() *flags {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading the .env file: %v", err)
+	}
+
 	var port = flag.Int("port", 8080, "port to listen on")
 	var dockerHost = flag.String("docker-host", "", "docker host")
 	var dockerCaCert = flag.String("docker-ca-cert", "", "docker cert path")
