@@ -1,8 +1,8 @@
 package server
 
 import (
-	"context"
 	"github.com/docker/docker/client"
+	docker_exposer "github.com/palindrom615/docker-exposer"
 	"github.com/palindrom615/docker-exposer/middleware"
 	"net/http"
 )
@@ -11,8 +11,7 @@ func Configure() *Server {
 	flags := provideFlags()
 	port := providePort(flags)
 	dockerOption := provideDockerOptions(flags)
-	dockerClient := provideDockerClient(dockerOption)
-	core := provideCore(dockerClient)
+	core := provideDockerRelay(dockerOption)
 	middlewares := provideMiddlewares(flags)
 	handler := provideHandler(core, middlewares)
 
@@ -43,16 +42,8 @@ func provideDockerOptions(flags dockerFlags) *[]client.Opt {
 	return &o
 }
 
-func provideDockerClient(opts *[]client.Opt) client.CommonAPIClient {
-	cli, err := client.NewClientWithOpts(*opts...)
-	if err != nil {
-		panic(err)
-	}
-	return cli
-}
-
 func provideMiddlewares(flags authFlags) []middleware.Middleware {
-	middlewares := []middleware.Middleware{}
+	var middlewares []middleware.Middleware
 
 	if flags.GetAuthType() == "basic" {
 		if flags.GetBasicAuthUsername() == "" || flags.GetBasicAuthPassword() == "" {
@@ -66,13 +57,8 @@ func provideMiddlewares(flags authFlags) []middleware.Middleware {
 	return append(middlewares, middleware.LogRequst)
 }
 
-func provideCore(dockerClient client.CommonAPIClient) http.Handler {
-	conn, err := dockerClient.Dialer()(context.Background())
-	if err != nil {
-		panic(err)
-	}
-
-	return NewConnector(conn)
+func provideDockerRelay(opts *[]client.Opt) http.Handler {
+	return docker_exposer.NewDockerRelay(*opts...)
 }
 
 func provideHandler(core http.Handler, middlewares []middleware.Middleware) http.Handler {
