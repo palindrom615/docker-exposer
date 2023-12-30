@@ -20,7 +20,7 @@ public internet without additional authentication mechanism.
 
 ```bash
 go install github.com/palindrom615/docker-exposer/cmd/docker-exposer@latest
-~/go/bin/docker-exposer --port 8080 --docker-host unix://$HOME/.colima/docker.sock \
+~/go/bin/docker-exposer --port 2375 --docker-host unix://$HOME/.colima/docker.sock \
   --auth-type basic --basic-auth-username alice --basic-auth-password pa55word
 ```
 
@@ -28,7 +28,7 @@ go install github.com/palindrom615/docker-exposer/cmd/docker-exposer@latest
 
 ```bash
 DOCKER_HOST=/var/run/docker.sock
-docker run -d -p 8080:8080 \
+docker run -d -p 2375:2375 \
   -v $DOCKER_HOST:/var/run/docker.sock \
   -e AUTH_TYPE=basic \
   -e BASIC_AUTH_USERNAME=alice \
@@ -39,27 +39,42 @@ docker run -d -p 8080:8080 \
 
 ## Options
 
-.env file is supported.
+### CLI options
 
 | flag                  | description                                                                      | default                          |
 |-----------------------|----------------------------------------------------------------------------------|----------------------------------|
-| --port                | port number to listen                                                            | 8080                             |
-| --docker-host         | docker host to connect                                                           | os.Getenv("DOCKER_HOST")         |
-| --docker-ca-cert      | path to docker CA cert on tls verify                                             | nil                              |
-| --docker-cert         | path to docker cert on tls verify                                                | nil                              |
-| --docker-key          | path to docker key on tls verify                                                 | nil                              |
+| --port                | port number to listen                                                            | 2375                             |
 | --auth-type           | authentication type. `basic` and `auth0` is supported. anything else is ignored. | os.Getenv("AUTH_TYPE")           |
 | --basic-auth-username | basic auth username                                                              | os.Getenv("BASIC_AUTH_USERNAME") |
 | --basic-auth-password | basic auth password                                                              | os.Getenv("BASIC_AUTH_PASSWORD") |
+| --docker-host         | docker host to connect                                                           | -                                |
+| --docker-tlscacert    | path to CA cert on tls connect                                                   | -                                |
+| --docker-tlscert      | path to cert on tls                                                              | -                                |
+| --docker-tlskey       | path to key on tls                                                               | -                                |
 
-### built-in authentication
+### Environment variables
 
-#### basic auth
+* .env file is supported. 
+* CLI options are prioritized over environment variables.
+* `DOCKER_HOST`, `DOCKER_API_VERSION`, `DOCKER_CERT_PATH`, `DOCKER_TLS_VERIFY` are supported by
+[docker client library](https://pkg.go.dev/github.com/docker/docker/client#FromEnv)
+
+| variable name       | description                                 | default |
+|---------------------|---------------------------------------------|---------|
+| AUTH_TYPE           | authentication type                         | -       |
+| BASIC_AUTH_USERNAME | basic auth username                         | -       |
+| BASIC_AUTH_PASSWORD | basic auth password                         | -       |
+| AUTH0_DOMAIN        | auth0 domain                                | -       |
+| AUTH0_AUDIENCE      | auth0 audience                              | -       |
+
+## built-in authentication
+
+### basic auth
 
 [Built-in basic auth implementation](middleware/basicauth.go) only supports single username and password given
 by `--basic-auth-username` and `--basic-auth-password`.
 
-#### auth0
+### auth0
 
 [built-in auth0 implementation](middleware/auth0.go)
 supports [auth0 Backend/API](https://auth0.com/docs/quickstart/backend/golang/01-authorization#configure-auth0-apis)

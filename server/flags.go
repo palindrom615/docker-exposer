@@ -32,11 +32,11 @@ func newFlags() *flags {
 	}
 	f := &flags{}
 
-	flag.IntVar(&f.Port, "port", 8080, "port to listen on")
+	flag.IntVar(&f.Port, "port", 2375, "port to listen on")
 	flag.StringVar(&f.DockerHost, "docker-host", "", "docker host")
-	flag.StringVar(&f.DockerCaCert, "docker-ca-cert", "", "docker cert path")
-	flag.StringVar(&f.DockerCert, "docker-cert", "", "docker cert")
-	flag.StringVar(&f.DockerKey, "docker-key", "", "docker key")
+	flag.StringVar(&f.DockerCaCert, "docker-tlscacert", "", "docker cert path")
+	flag.StringVar(&f.DockerCert, "docker-tlscert", "", "docker cert")
+	flag.StringVar(&f.DockerKey, "docker-tlskey", "", "docker key")
 	flag.StringVar(&f.AuthType, "auth", os.Getenv("AUTH_TYPE"), "auth type")
 	flag.StringVar(&f.BasicAuthUsername, "basic-auth-username", os.Getenv("BASIC_AUTH_USERNAME"), "basic auth username")
 	flag.StringVar(&f.BasicAuthPassword, "basic-auth-password", os.Getenv("BASIC_AUTH_PASSWORD"), "basic auth password")

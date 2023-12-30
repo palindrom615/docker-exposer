@@ -10,6 +10,4 @@ COPY . ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build ./cmd/docker-exposer
 
-EXPOSE 8080
-
 CMD ["./docker-exposer"]
