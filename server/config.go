@@ -53,11 +53,11 @@ func provideDockerClient(opts *[]client.Opt) client.CommonAPIClient {
 
 func provideMiddlewares() []middleware.Middleware {
 	return []middleware.Middleware{
-		middleware.RequestLog,
+		middleware.RequestLogHandler,
 	}
 }
 
-func provideCore(dockerClient client.CommonAPIClient) http.RoundTripper {
+func provideCore(dockerClient client.CommonAPIClient) http.Handler {
 	conn, err := dockerClient.Dialer()(context.Background())
 	if err != nil {
 		panic(err)
@@ -66,6 +66,6 @@ func provideCore(dockerClient client.CommonAPIClient) http.RoundTripper {
 	return NewConnector(conn)
 }
 
-func provideHandler(core http.RoundTripper, middlewares []middleware.Middleware) http.Handler {
-	return middleware.NewHandler(core, middlewares...)
+func provideHandler(core http.Handler, middlewares []middleware.Middleware) http.Handler {
+	return middleware.ChainHandlers(core, middlewares...)
 }

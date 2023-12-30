@@ -4,19 +4,11 @@ import (
 	"net/http"
 )
 
-type Middleware func(roundTrip http.RoundTripper) http.RoundTripper
+type Middleware func(http.Handler) http.Handler
 
-type RoundTripFunc func(req *http.Request) (res *http.Response, err error)
-
-func (f RoundTripFunc) RoundTrip(req *http.Request) (res *http.Response, err error) {
-	return f(req)
-}
-
-func chain(middleware ...Middleware) Middleware {
-	return func(roundTrip http.RoundTripper) http.RoundTripper {
-		for _, m := range middleware {
-			roundTrip = m(roundTrip)
-		}
-		return roundTrip
+func ChainHandlers(handler http.Handler, middlewares ...Middleware) http.Handler {
+	for _, middleware := range middlewares {
+		handler = middleware(handler)
 	}
+	return handler
 }

@@ -3,28 +3,59 @@ package middleware
 import (
 	"context"
 	"github.com/palindrom615/docker-exposer/logger"
+	"go.uber.org/zap"
 	"math/rand"
 	"net/http"
 )
 
-type key string
+const RequestIDKey string = "request_id"
 
-const RequestIDKey key = "request_id"
+type CtxKey string
+
+const RequestID CtxKey = "request_id"
 
 var log = logger.DefaultLogger()
 
-func RequestLog(roundTrip http.RoundTripper) http.RoundTripper {
-	return RoundTripFunc(
-		func(req *http.Request) (res *http.Response, err error) {
-			rid := rand.Uint64()
-			log := log.With(RequestIDKey, rid)
-			req = req.WithContext(context.WithValue(req.Context(), RequestIDKey, rid))
-			log.Debugw("Request", "method", req.Method, "url", req.URL, "headers", req.Header, "body", req.Body)
+type RequestLogWriter struct {
+	rw         http.ResponseWriter
+	statusCode int
+	body       []byte
+}
 
-			res, err = roundTrip.RoundTrip(req)
+func NewRequestLogWriter(rw http.ResponseWriter) *RequestLogWriter {
+	return &RequestLogWriter{rw: rw}
+}
 
-			log.Debugw("Response", "method", req.Method, "url", req.URL, "headers", res.Header, "body", res.Body, "err", err)
-			return
-		},
-	)
+func (w *RequestLogWriter) Header() http.Header {
+	return w.rw.Header()
+}
+
+func (w *RequestLogWriter) Write(b []byte) (int, error) {
+	w.body = b
+	return w.rw.Write(b)
+}
+
+func (w *RequestLogWriter) WriteHeader(statusCode int) {
+	w.statusCode = statusCode
+	w.rw.WriteHeader(statusCode)
+}
+
+func (w *RequestLogWriter) Log(log *zap.SugaredLogger) {
+	log.Debugw("Response", "status", w.statusCode, "body", string(w.body), "headers", w.Header())
+}
+
+func RequestLogHandler(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rid := rand.Uint64()
+		log := log.With(RequestIDKey, rid)
+		r = r.WithContext(context.WithValue(r.Context(), RequestID, rid))
+		log.Debugw("Request", "method", r.Method, "url", r.URL, "headers", r.Header, "body", r.Body)
+
+		lrw := NewRequestLogWriter(w)
+
+		next.ServeHTTP(lrw, r)
+		lrw.Log(log)
+
+		log.Debugw("Response", "method", r.Method, "url", r.URL, "headers", r.Header, "body", r.Body)
+	})
 }
