@@ -51,16 +51,19 @@ func provideDockerClient(opts *[]client.Opt) client.CommonAPIClient {
 	return cli
 }
 
-func provideMiddlewares(flags basicAuthFlags) []middleware.Middleware {
-	if flags.GetEnableBasicAuth() && flags.GetBasicAuthUsername() != "" && flags.GetBasicAuthPassword() != "" {
-		return []middleware.Middleware{
-			middleware.NewBasicAuth(flags.GetBasicAuthUsername(), flags.GetBasicAuthPassword()).Middleware,
-			middleware.RequestLogHandler,
+func provideMiddlewares(flags authFlags) []middleware.Middleware {
+	middlewares := []middleware.Middleware{}
+
+	if flags.GetAuthType() == "basic" {
+		if flags.GetBasicAuthUsername() == "" || flags.GetBasicAuthPassword() == "" {
+			log.Panic("Basic auth username and password must be set")
 		}
+		middlewares = append(middlewares, middleware.NewBasicAuth(flags.GetBasicAuthUsername(), flags.GetBasicAuthPassword()).Middleware)
+	} else if flags.GetAuthType() == "auth0" {
+		middlewares = append(middlewares, middleware.EnsureValidToken())
 	}
-	return []middleware.Middleware{
-		middleware.RequestLogHandler,
-	}
+
+	return append(middlewares, middleware.LogRequst)
 }
 
 func provideCore(dockerClient client.CommonAPIClient) http.Handler {

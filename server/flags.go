@@ -17,8 +17,9 @@ type flags struct {
 	DockerCert string
 	// DockerKey is the path to the docker key
 	DockerKey string
-	// EnableBasicAuth enables basic auth
-	EnableBasicAuth bool
+	// AuthType is the auth type. `basic`, `auth0` is supported. anything else is ignored.
+	// default: os.Getenv("AUTH_TYPE")
+	AuthType string
 	// BasicAuthUsername is the username for basic auth
 	BasicAuthUsername string
 	// BasicAuthPassword is the password for basic auth
@@ -35,7 +36,7 @@ func newFlags() *flags {
 	var dockerCaCert = flag.String("docker-ca-cert", "", "docker cert path")
 	var dockerCert = flag.String("docker-cert", "", "docker cert")
 	var dockerKey = flag.String("docker-key", "", "docker key")
-	var enableBasicAuth = flag.Bool("enable-basic-auth", false, "enable basic auth")
+	var authType = flag.String("auth", os.Getenv("AUTH_TYPE"), "enable basic auth")
 	var basicAuthUsername = flag.String("basic-auth-username", os.Getenv("BASIC_AUTH_USERNAME"), "basic auth username")
 	var basicAuthPassword = flag.String("basic-auth-password", os.Getenv("BASIC_AUTH_PASSWORD"), "basic auth password")
 
@@ -46,7 +47,7 @@ func newFlags() *flags {
 		DockerCaCert:      *dockerCaCert,
 		DockerCert:        *dockerCert,
 		DockerKey:         *dockerKey,
-		EnableBasicAuth:   *enableBasicAuth,
+		AuthType:          *authType,
 		BasicAuthUsername: *basicAuthUsername,
 		BasicAuthPassword: *basicAuthPassword,
 	}
@@ -84,14 +85,14 @@ func (f *flags) GetDockerKey() string {
 	return f.DockerKey
 }
 
-type basicAuthFlags interface {
-	GetEnableBasicAuth() bool
+type authFlags interface {
+	GetAuthType() string
 	GetBasicAuthUsername() string
 	GetBasicAuthPassword() string
 }
 
-func (f *flags) GetEnableBasicAuth() bool {
-	return f.EnableBasicAuth
+func (f *flags) GetAuthType() string {
+	return f.AuthType
 }
 
 func (f *flags) GetBasicAuthUsername() string {
