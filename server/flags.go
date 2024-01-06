@@ -27,9 +27,7 @@ type flags struct {
 }
 
 func newFlags() *flags {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading the .env file: %v", err)
-	}
+	_ = godotenv.Load()
 	f := &flags{}
 
 	flag.IntVar(&f.Port, "port", 2375, "port to listen on")
